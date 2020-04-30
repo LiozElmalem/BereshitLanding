@@ -11,8 +11,7 @@ public class PID {
       this.D = 0;
       this.max = max;
     }
-    
-	// Error is expected - answer
+    	
     public double execute(double dt , double error) {
     	this.sumIntegral += this.I * error * dt;
     	double difference = (error - lastError) / dt;
