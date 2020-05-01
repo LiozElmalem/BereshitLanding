@@ -1,0 +1,1 @@
+time : 0, vs : 24.8, hs : 932, distance : 181000, alt : 13748, ang : 58.3, weight : 286, acc : 0
