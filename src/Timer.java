@@ -7,5 +7,5 @@ public class Timer {
 	Timer(){
 		time = 0;
 		dt = 1;
-	}
+	} 
 }

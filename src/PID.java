@@ -2,17 +2,19 @@
 public class PID {
 	
 	private int P, I, D;
-	private double lastError = 0 , sumIntegral = 0;
+	private double lastError, sumIntegral;
     private int max;
     
 	public PID(int max){
       this.P = 0;
       this.I = 0;
       this.D = 0;
+      this.lastError = 0;
+      this.sumIntegral = 0;
       this.max = max;
     }
     	
-    public double execute(double dt , double error) {
+    public double control(double dt , double error) {
     	this.sumIntegral += this.I * error * dt;
     	double difference = (error - lastError) / dt;
     	double constIntegral = (this.sumIntegral >= -this.max) ? this.sumIntegral : 0; 
