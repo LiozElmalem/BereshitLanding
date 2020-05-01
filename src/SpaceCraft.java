@@ -9,8 +9,13 @@ public class SpaceCraft {
 	private Point location;
 	private CPU cpu;
 	public Timer timer;
-	private PID pid;
-
+	
+	private PID horizontalSpeedPID;
+	private PID verticalSpeedPID;
+	private PID altitudePID;
+	private PID ditancePID;
+	private PID anglePID;
+	
 	public double vs; // Vertical speed
 	public double hs; // Horizontal speed
 	public double dist; // Distance from the moon
@@ -23,43 +28,47 @@ public class SpaceCraft {
 
 	SpaceCraft() {
 		this.timer = new Timer();
+		
 		this.cpu = new CPU(200, "update");
-		this.cpu.addFunction(this::update2);
+		this.cpu.addFunction(this::update);
+		
 		this.engines = new ArrayList<Engine>(8);
+		
 		this.location = Config.startPoint;
+		
 		this.status = SpaceCraftStatus.ON;
-		this.pid = new PID(1000);
-		double engineInitPower = 1;
+		
 		for(int i = 0; i < 8; i++) {
 			Engine engine = null;
 			switch(i) {
 			case 1:
-				engine = new Engine("LeftEast1" , engineInitPower);
+				engine = new Engine("LeftEast1" , Config.engineInitPower);
 				break;
 			case 2:
-				engine = new Engine("LeftEast2" , engineInitPower);
+				engine = new Engine("LeftEast2" , Config.engineInitPower);
 				break;
 			case 3:
-				engine = new Engine("LeftWest1" , engineInitPower);
+				engine = new Engine("LeftWest1" , Config.engineInitPower);
 				break;
 			case 4:
-				engine = new Engine("LeftWest2" , engineInitPower);
+				engine = new Engine("LeftWest2" , Config.engineInitPower);
 				break;
 			case 5:
-				engine = new Engine("RightEast1" , engineInitPower);
+				engine = new Engine("RightEast1" , Config.engineInitPower);
 				break;
 			case 6:
-				engine = new Engine("RightEast2" , engineInitPower);
+				engine = new Engine("RightEast2" , Config.engineInitPower);
 				break;
 			case 7:
-				engine = new Engine("RightWest1" , engineInitPower);
+				engine = new Engine("RightWest1" , Config.engineInitPower);
 				break;
 			case 8:
-				engine = new Engine("RightWest2" , engineInitPower);
+				engine = new Engine("RightWest2" , Config.engineInitPower);
 				break;
 			}
 			engines.add(engine);
 		}
+		
 		vs = 24.8;
 		hs = 932; 
 		dist = Config.START_DISTANCE;
@@ -73,51 +82,6 @@ public class SpaceCraft {
 		NN = 0.7; // rate[0,1] -> Normalize the fuel according to the spaceCraft situation
 	}
 	
-	public void update2(int deltaTime) {
-		if(status == SpaceCraftStatus.ON) {
-			
-			NN = pid.control(timer.dt, NN);
-			ang = pid.control(timer.dt, ang);
-			hs = pid.control(timer.dt , hs);
-			acc = pid.control(timer.dt, acc);
-			alt = pid.control(timer.dt, alt);
-			vs = pid.control(timer.dt, vs);
-			dist = pid.control(timer.dt, dist);
-			
-			double ang_rad = Math.toRadians(ang);
-			double h_acc = Math.sin(ang_rad) * acc;
-			double v_acc = Math.cos(ang_rad) * acc;
-			double vacc = Utils.getAcc(hs);
-			double dw = timer.dt * Config.ALL_BURN * NN;
-			
-			timer.time += timer.dt;
-
-//			if (fuel > 0) {
-//				fuel -= dw;
-//				weight = Config.WEIGHT_EMP + fuel;
-//				acc = NN * Utils.accMax(weight);
-//			} else { // ran out of fuel
-//				acc = 0;
-//			}
-//			v_acc -= vacc;
-//			if (hs > 0) {
-//				hs -= h_acc * timer.dt;
-//			}
-			
-			dist -= hs * timer.dt;
-			vs -= v_acc * timer.dt;
-			alt -= vs * timer.dt;
-			
-			double distToTarget = Utils.getDistanceBetweenPoints(location, Config.target);
-			
-			move();
-			 
-			if(Config.moonCircleBounds.contains(location.x , location.y) || distToTarget < 1) {
-				this.status = SpaceCraftStatus.OFF;
-			}
-		}
-	}
-
 	public void update(int deltaTime) {
 		if (this.status == SpaceCraftStatus.ON) {
 			// over 2 kilometer above the ground
@@ -138,10 +102,9 @@ public class SpaceCraft {
 				else {
 					ang = 0;
 				}
-				
-//				NN = 0.5; // brake slowly, a proper PID controller here is needed!
-				NN = pid.control(timer.dt, 0.5);
-				
+								
+				NN = 0.5; // brake slowly, a proper PID controller here is needed!
+			
 				if(hs < 2) {
 					hs = 0;
 				}
@@ -187,6 +150,9 @@ public class SpaceCraft {
 			if(Config.moonCircleBounds.contains(location.x , location.y) || distToTarget < 1) {
 				this.status = SpaceCraftStatus.OFF;
 			}
+			if(alt <= 0) {
+				this.status = SpaceCraftStatus.OFF;
+			}
 
 		}
 	}
@@ -203,10 +169,6 @@ public class SpaceCraft {
 						+ ", ang : " + dfff.format(ang) + ", weight : " + dfff.format(weight) + ", acc : "
 						+ dfff.format(acc));
 		}
-	}
-	
-	public PID getPID() {
-		return this.pid;
 	}
 
 	public CPU getCPU() {
