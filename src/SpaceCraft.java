@@ -3,19 +3,19 @@ import java.util.ArrayList;
 import javax.swing.JLabel;
 
 public class SpaceCraft {
- 
+
 	private SpaceCraftStatus status; // Off / On
 	private ArrayList<Engine> engines;
 	private Point location;
 	private CPU cpu;
 	public Timer timer;
-	
+
 	private PID horizontalSpeedPID;
 	private PID verticalSpeedPID;
 	private PID altitudePID;
 	private PID ditancePID;
 	private PID anglePID;
-	
+
 	public double vs; // Vertical speed
 	public double hs; // Horizontal speed
 	public double dist; // Distance from the moon
@@ -28,16 +28,16 @@ public class SpaceCraft {
 
 	SpaceCraft() {
 		this.timer = new Timer();
-		
+
 		this.cpu = new CPU(200, "update");
 		this.cpu.addFunction(this::update);
-		
+
 		this.engines = new ArrayList<Engine>(8);
-		
+
 		this.location = Config.startPoint;
-		
+
 		this.status = SpaceCraftStatus.ON;
-		
+
 		for(int i = 0; i < 8; i++) {
 			Engine engine = null;
 			switch(i) {
@@ -68,7 +68,7 @@ public class SpaceCraft {
 			}
 			engines.add(engine);
 		}
-		
+
 		vs = 24.8;
 		hs = 932; 
 		dist = Config.START_DISTANCE;
@@ -81,7 +81,7 @@ public class SpaceCraft {
 		weight = Config.WEIGHT_EMP + fuel;
 		NN = 0.7; // rate[0,1] -> Normalize the fuel according to the spaceCraft situation
 	}
-	
+
 	public void update(int deltaTime) {
 		if (this.status == SpaceCraftStatus.ON) {
 			// over 2 kilometer above the ground
@@ -102,9 +102,9 @@ public class SpaceCraft {
 				else {
 					ang = 0;
 				}
-								
+
 				NN = 0.5; // brake slowly, a proper PID controller here is needed!
-			
+
 				if(hs < 2) {
 					hs = 0;
 				}
@@ -126,7 +126,7 @@ public class SpaceCraft {
 			double dw = timer.dt * Config.ALL_BURN * NN;
 
 			timer.time += timer.dt;
-			
+
 			if (fuel > 0) {
 				fuel -= dw;
 				weight = Config.WEIGHT_EMP + fuel;
@@ -138,15 +138,15 @@ public class SpaceCraft {
 			if (hs > 0) {
 				hs -= h_acc * timer.dt;
 			}
-			
+
 			dist -= hs * timer.dt;
 			vs -= v_acc * timer.dt;
 			alt -= vs * timer.dt;
-			
+
 			double distToTarget = Utils.getDistanceBetweenPoints(location, Config.target);
-			
+
 			move();
-			 
+
 			if(Config.moonCircleBounds.contains(location.x , location.y) || distToTarget < 1) {
 				this.status = SpaceCraftStatus.OFF;
 			}
@@ -163,11 +163,11 @@ public class SpaceCraft {
 
 	public void updateInfo(int deltaTime , JLabel info) {
 		if(timer.time % 50 == 0) {
-		DecimalFormat dfff = new DecimalFormat("#.##");
-		info.setText("time : " + dfff.format(timer.time) + ", vs : " + dfff.format(vs) + ", hs : "
-						+ dfff.format(hs) + ", distance : " + dfff.format(dist) +  ", alt : " + dfff.format(alt)
-						+ ", ang : " + dfff.format(ang) + ", weight : " + dfff.format(weight) + ", acc : "
-						+ dfff.format(acc));
+			DecimalFormat dfff = new DecimalFormat("#.##");
+			info.setText("time : " + dfff.format(timer.time) + ", vs : " + dfff.format(vs) + ", hs : "
+					+ dfff.format(hs) + ", distance : " + dfff.format(dist) +  ", alt : " + dfff.format(alt)
+					+ ", ang : " + dfff.format(ang) + ", weight : " + dfff.format(weight) + ", acc : "
+					+ dfff.format(acc));
 		}
 	}
 
@@ -182,7 +182,7 @@ public class SpaceCraft {
 	public Point getLocation() {
 		return this.location;
 	}
-	
+
 	public void move() {
 		setLocation(new Point(990, (Config.START_ALTITUDE - (int) alt) / Config.NORM_ALT));
 	}

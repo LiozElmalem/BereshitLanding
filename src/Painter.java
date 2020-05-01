@@ -9,6 +9,9 @@ public class Painter extends JComponent {
 
 	private static final long serialVersionUID = 1L;
 	private SpaceCraft spaceCraft;
+	
+	private double radians = 0; //snir &&&&&&&&&&&&&&&&&&&
+	private double velocity = 0.003; // snir &&&&&&&&&&&&&&&&&
  
 	Painter(SpaceCraft spaceCraft) {
 		this.spaceCraft = spaceCraft;
@@ -42,15 +45,32 @@ public class Painter extends JComponent {
 	public void paintMoon(Graphics g) {
 		g.drawImage(
 				Toolkit.getDefaultToolkit().getImage(
-						"C:\\Users\\user\\Desktop\\Lioz\\Autonomic Robots\\Bereshit-landing-master\\images\\moon.jpeg"),
+						"C:\\Users\\Snir\\git\\Bereshit-landing\\images\\moon.jpeg"),
 				(int)Config.moonPoint.x, (int)Config.moonPoint.y, null);
 	}
 
 	public void paintSpaceCraft(Graphics g) {
 		g.drawImage(
 				Toolkit.getDefaultToolkit().getImage(
-						"C:\\Users\\user\\Desktop\\Lioz\\Autonomic Robots\\Bereshit-landing-master\\images\\spaceCraft2.jpeg"),
+						"C:\\Users\\Snir\\git\\Bereshit-landing\\images\\spaceCraft2.jpeg"),
 				(int) this.spaceCraft.getLocation().x, (int) this.spaceCraft.getLocation().y, null);
+	}
+
+	public void paintOrbit(Graphics g) {//snir $$$$$$$$$$$$$$$$$$$$$$$$$$$$
+		double[] XandY= {Config.target.x ,Config.target.y};
+		g.drawImage(
+				Toolkit.getDefaultToolkit().getImage(
+						"C:\\Users\\Snir\\git\\Bereshit-landing\\images\\spaceCraft2.jpeg"),
+				(int)updateOrbit(XandY)[0], (int)updateOrbit(XandY)[1], null);
+	}
+
+	
+	private double[] updateOrbit(double [] XandY) {///snir $$$$$$$$$$$$$$$$$$
+		this.radians+=this.velocity;
+		XandY[0] += Math.cos(this.radians)*400;
+		XandY[1] += Math.sin(this.radians)*200;
+		
+		return XandY;
 	}
 
 	@Override
@@ -58,10 +78,11 @@ public class Painter extends JComponent {
 		super.paintComponent(g);
 		setBackground(Color.black);
 		paintMoon(g);
-		paintSpaceCraft(g);
+	//	paintSpaceCraft(g);
 		paintTarget(g);	
 		paintLaser(g);
 		paintStars(g);
+		paintOrbit(g); //snir &&&&&&&&&&&&&&&&&&&&&&&&&&&&
 		setVisible(true);
 	}
 }

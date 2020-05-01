@@ -34,7 +34,7 @@ public class Frame extends JFrame{
 			  }
 		});
 		
-		stopBtn.setBounds(1600, 10, 150, 50);
+		stopBtn.setBounds(0, 10, 150, 50);
 		this.getContentPane().add(stopBtn);
 		
 		JButton startButton = new JButton(" Start ");
@@ -49,14 +49,15 @@ public class Frame extends JFrame{
 			  }
 		});
 		
-		startButton.setBounds(1600, 60, 150, 50);
+		startButton.setBounds(0, 60, 150, 50);
 		this.getContentPane().add(startButton);
 		
 		Painter painter = new Painter(spaceCraft);
 		painter.setBounds(0, 0, 1800, 700);
 		add(painter);
+		
 		info = new JLabel("Info");
-		info.setBounds(100, 500, 1800, 700);
+		info.setBounds(100, 500, 1800, 200);
         info.setFont(new Font("Comic Sans MS", Font.PLAIN, 35));
         info.setForeground(Color.WHITE);
 		add(info);
