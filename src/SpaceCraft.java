@@ -4,7 +4,7 @@ import javax.swing.JLabel;
 
 public class SpaceCraft {
 
-	private SpaceCraftStatus status; // Off / On
+	SpaceCraftStatus status; // Off / On
 	private ArrayList<Engine> engines;
 	private Point location;
 	private CPU cpu;
@@ -13,7 +13,7 @@ public class SpaceCraft {
 	private PID horizontalSpeedPID;
 	private PID verticalSpeedPID;
 	private PID altitudePID;
-	private PID ditancePID;
+	private PID distancePID;
 	private PID anglePID;
 
 	public double vs; // Vertical speed
@@ -26,6 +26,11 @@ public class SpaceCraft {
 	public double weight;
 	public double NN;
 
+	double northEnginePower=0;//snir ^^^^^^^^^^^^^^^^^^^
+	double eastEnginePower=0;
+	double southEnginePower=0;
+	double westEnginePower=0;
+	
 	SpaceCraft() {
 		this.timer = new Timer();
 
@@ -38,32 +43,32 @@ public class SpaceCraft {
 
 		this.status = SpaceCraftStatus.ON;
 
-		for(int i = 0; i < 8; i++) {
+		for(int i = 0; i < 8; i++) {// snir %%%%%%%%%%%%%%%%%%
 			Engine engine = null;
 			switch(i) {
+			case 0:
+				engine = new Engine("North1" , Config.engineInitPower);
+				break;
 			case 1:
-				engine = new Engine("LeftEast1" , Config.engineInitPower);
+				engine = new Engine("North2" , Config.engineInitPower);
 				break;
 			case 2:
-				engine = new Engine("LeftEast2" , Config.engineInitPower);
+				engine = new Engine("East1" , Config.engineInitPower);
 				break;
 			case 3:
-				engine = new Engine("LeftWest1" , Config.engineInitPower);
+				engine = new Engine("East2" , Config.engineInitPower);
 				break;
 			case 4:
-				engine = new Engine("LeftWest2" , Config.engineInitPower);
+				engine = new Engine("South1" , Config.engineInitPower);
 				break;
 			case 5:
-				engine = new Engine("RightEast1" , Config.engineInitPower);
+				engine = new Engine("South2" , Config.engineInitPower);
 				break;
 			case 6:
-				engine = new Engine("RightEast2" , Config.engineInitPower);
+				engine = new Engine("West1" , Config.engineInitPower);
 				break;
 			case 7:
-				engine = new Engine("RightWest1" , Config.engineInitPower);
-				break;
-			case 8:
-				engine = new Engine("RightWest2" , Config.engineInitPower);
+				engine = new Engine("West2" , Config.engineInitPower);
 				break;
 			}
 			engines.add(engine);
@@ -72,7 +77,10 @@ public class SpaceCraft {
 		vs = 24.8;
 		hs = 932; 
 		dist = Config.START_DISTANCE;
-		ang = 58.3; // zero is vertical (as in landing)
+		
+		//ang = calcAngle(); // snir (((((((((((((((((((((((
+		ang = 58.3;
+		
 		alt = Config.START_ALTITUDE; // 2:25:40 (as in the simulation) // https://www.youtube.com/watch?v=JJ0VfRL9AMs
 		timer.time = 0;
 		timer.dt = 1; // sec
@@ -81,7 +89,25 @@ public class SpaceCraft {
 		weight = Config.WEIGHT_EMP + fuel;
 		NN = 0.7; // rate[0,1] -> Normalize the fuel according to the spaceCraft situation
 	}
+	
+	private void updateEnginesPower() {// snir @@@@@@@@@@@@@@
+			northEnginePower=engines.get(0).getPower()+engines.get(1).getPower();
+			eastEnginePower=engines.get(2).getPower()+engines.get(3).getPower();
+			southEnginePower=engines.get(4).getPower()+engines.get(5).getPower();
+			westEnginePower=engines.get(6).getPower()+engines.get(7).getPower();
+	}
 
+	private double calcAngle() { // snir @@@@@@@@@@@@@@
+		updateEnginesPower();
+		return (northEnginePower-southEnginePower) + (eastEnginePower-westEnginePower);
+	}
+	
+	/*
+	 * Need to add some code to send to PID class, checking the angle and update every engine
+	 */
+	/*
+	 * And change this function below -> it is stupid
+	 */
 	public void update(int deltaTime) {
 		if (this.status == SpaceCraftStatus.ON) {
 			// over 2 kilometer above the ground
@@ -187,6 +213,10 @@ public class SpaceCraft {
 		setLocation(new Point(990, (Config.START_ALTITUDE - (int) alt) / Config.NORM_ALT));
 	}
 
+	public void setStatus(SpaceCraftStatus name) {
+		this.status=name;
+	}
+	
 	public static enum SpaceCraftStatus {
 		OFF, ON , CLOSE
 	}

@@ -3,8 +3,9 @@ import java.awt.geom.Ellipse2D;
 
 public class Config {
 	 
+	public static final Point landindCordinate = new Point (1000,380);
 	
-	public static final int engineInitPower = 1;
+	public static final double engineInitPower = 0.1;
 	public static final int spaceCraftDimension = 20;
 	public static final int targetDimension = 10;
 	public static final Point moonPoint = new Point(900 , 350);

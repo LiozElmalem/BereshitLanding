@@ -5,6 +5,11 @@ public class PID {
 	private double lastError, sumIntegral;
     private int[] range;
     
+    /*
+     * P = present
+     * I = past
+     * D = future
+     */
 	public PID(int P , int I , int D , int max){
       this.P = P;
       this.I = I;

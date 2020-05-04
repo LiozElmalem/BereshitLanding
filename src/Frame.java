@@ -13,6 +13,7 @@ public class Frame extends JFrame{
 	private JLabel info;
 	private SpaceCraft spaceCraft;
 	
+	
 	Frame(SpaceCraft spaceCraft){
 		super("SpaceCraft Landing");
 
@@ -45,6 +46,7 @@ public class Frame extends JFrame{
 		{ 
 			  public void actionPerformed(ActionEvent e)
 			  {
+				  	Painter.isStart=true; 
 					spaceCraft.land();
 			  }
 		});
@@ -57,7 +59,7 @@ public class Frame extends JFrame{
 		add(painter);
 		
 		info = new JLabel("Info");
-		info.setBounds(100, 500, 1800, 200);
+		info.setBounds(100, 440, 1800, 200);
         info.setFont(new Font("Comic Sans MS", Font.PLAIN, 35));
         info.setForeground(Color.WHITE);
 		add(info);
@@ -77,5 +79,7 @@ public class Frame extends JFrame{
 	public void infoUpdate(int deltaTime) {
 		this.spaceCraft.updateInfo(deltaTime, this.info);
 	}
+	
+
 	
 }
