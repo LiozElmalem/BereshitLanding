@@ -1,3 +1,4 @@
+import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Image;
 
@@ -9,12 +10,17 @@ public class Simulator extends JFrame{
 	private static final long serialVersionUID = 1L;	
 	private static final Image BackroundPath=new ImageIcon("C:\\Users\\Snir\\git\\Bereshit-landing\\images\\backround1.png").getImage();
 	private static final Image SpacecraftPath=new ImageIcon("C:\\Users\\Snir\\git\\Bereshit-landing\\images\\spacecraft.png").getImage();
+	private static double Normalize=150;
+	private static int NormalizePixel_Y=40;
+	private static int NormalizePixel_X=85;
+
 	
 	static double lastALT;
 	static double lastHS;
 	static double lastVS;
 	static int x;
 	static int y;
+	Point landingPoint=new Point(Moon.LANDING_AREA_X,Moon.LANDING_AREA_Y);
 	
 	
 	public Simulator() {
@@ -32,6 +38,8 @@ public class Simulator extends JFrame{
 
 	public void paint(Graphics g) {
 		g.drawImage(BackroundPath, 0, 0, 1200, 750, null);
+		g.setColor(Color.green);
+		g.fillOval(Moon.LANDING_AREA_X, Moon.LANDING_AREA_Y, 40, 15);//Landing area
 		g.drawImage(SpacecraftPath,x,y,20,20,null);
 	}
 	
@@ -46,26 +54,49 @@ public class Simulator extends JFrame{
 	
 			if(bs.getTime()%10==0 || bs.getAlt()<100) {
 				System.out.println(bs.toString());
+				
+				Normalize-=2.4;//snir
 			}
 			// over 2 km above the ground
 			if(bs.getAlt()>2000) {	// maintain a vertical speed of [20-25] m/s
-				if(bs.getVS() >25) {bs.setNN(bs.getNN()+0.003*bs.getDT());} // more power for braking
-				if(bs.getVS() <20) {bs.setNN(bs.getNN()-0.003*bs.getDT());} // less power for braking
+				if(bs.getVS() >25) {
+					bs.setNN(bs.getNN()+0.003*bs.getDT());// more power for braking
+
+				} 
+				if(bs.getVS() <20) {
+					bs.setNN(bs.getNN()-0.003*bs.getDT());// less power for braking
+				} 
 			}
 			// lower than 2 km - horizontal speed should be close to zero
 			else {
-				if(bs.getAng()>3) {bs.setAng(bs.getAng()-3);} // rotate to vertical position.
-				else {bs.setAng(0);}
-				bs.setNN(0.5); // brake slowly, a proper PID controller here is needed!
-				if(bs.getHS()<2) {bs.setHS(0);}
-				if(bs.getAlt()<125) { // very close to the ground!
+				if(bs.getAng()>3) {
+					bs.setAng(bs.getAng()-3);
+				} // rotate to vertical position.
+				else {
+					bs.setAng(0);
+				}
+				
+				bs.setNN(0.5); // brake slowly, a proper PID controller here is needed!          PID
+
+				
+				if(bs.getHS()<2) {
+					bs.setHS(0);
+				}
+				if(bs.getAlt()<125){ // very close to the ground!
 					bs.setNN(1); // maximum braking!
-					if(bs.getVS()<5) {bs.setNN(0.7);} // if it is slow enough - go easy on the brakes 
+					if(bs.getVS()<5) {
+						bs.setNN(0.7);	
+					} // if it is slow enough - go easy on the brakes 
 				}
 			}
 			if(bs.getAlt()<5) { // no need to stop
 				bs.setNN(0.4);
+				
 			}
+			
+			bs.updateAllEnginesPower(bs.getNN());//Update the engines power                 snir
+
+			
 			// main computations
 			double ang_rad = Math.toRadians(bs.getAng());
 			double h_acc = Math.sin(ang_rad)*bs.getAcc();
@@ -84,15 +115,22 @@ public class Simulator extends JFrame{
 
 			v_acc -= vacc; 
 			if(bs.getHS()>0) {bs.setHS(bs.getHS()- h_acc*bs.getDT());}
-			bs.setDist(bs.getDist()-bs.getHS()*bs.getDT());
+			
 			bs.setVS(bs.getVS()- v_acc*bs.getDT());
 			bs.setAlt(bs.getAlt()-bs.getDT()*bs.getVS()); 
 			
 			
-			//snir
+			//////////////////////////////////////////////////////////////////////////////////snir
+			if(bs.getAlt()>1000) {
+				//bs.setDist(bs.getDist()-bs.getHS()*bs.getDT());//boaz
+				bs.setDist(bs.getPoint().distance2D(landingPoint)*Normalize);
+			}else {
+				bs.setDist(bs.getAlt());
+			}
+			
 			if((lastALT-bs.getAlt()>1000) && (lastHS-bs.getHS()>60)) {
-				y=(int)(bs.getPoint().y+40);
-				x=(int)(bs.getPoint().x+85);
+				y=(int)(bs.getPoint().y+NormalizePixel_Y);
+				x=(int)(bs.getPoint().x+NormalizePixel_X);
 				bs.p.y=y;
 				bs.p.x=x;
 				lastHS=bs.getHS();
@@ -103,7 +141,7 @@ public class Simulator extends JFrame{
 				y=(int)(bs.getPoint().y+1);
 				bs.p.y=y;
 			}
-			//snir
+			//////////////////////////////////////////////////////////////////////////////////snir
 
 			try {
 				Thread.sleep(10);

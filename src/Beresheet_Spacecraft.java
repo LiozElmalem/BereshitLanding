@@ -23,6 +23,7 @@ public class Beresheet_Spacecraft {
 	double weight;
 	double NN; // rate[0,1] How much gas to give to the system
 	
+	NavigationEngine[] EngArr;
 	Point p;
 	
 	public Beresheet_Spacecraft() {
@@ -39,15 +40,15 @@ public class Beresheet_Spacecraft {
 		NN = 0.7; 
 		p=new Point(0,100);//starting point
 		
-		NavigationEngine[] EngArr=new NavigationEngine[8];
-		EngArr[0]=new NavigationEngine("North1",1);
-		EngArr[1]=new NavigationEngine("North2",1);
-		EngArr[2]=new NavigationEngine("East1",1);
-		EngArr[3]=new NavigationEngine("East2",1);
-		EngArr[4]=new NavigationEngine("South1",1);
-		EngArr[5]=new NavigationEngine("South2",1);
-		EngArr[6]=new NavigationEngine("West1",1);
-		EngArr[7]=new NavigationEngine("West2",1);
+		EngArr=new NavigationEngine[8];
+		EngArr[0]=new NavigationEngine("North1",0);
+		EngArr[1]=new NavigationEngine("North2",0);
+		EngArr[2]=new NavigationEngine("East1",0);
+		EngArr[3]=new NavigationEngine("East2",0);
+		EngArr[4]=new NavigationEngine("South1",0);
+		EngArr[5]=new NavigationEngine("South2",0);
+		EngArr[6]=new NavigationEngine("West1",0);
+		EngArr[7]=new NavigationEngine("West2",0);
 	}
 	
 	///////////Get//////////////////////////////
@@ -124,6 +125,12 @@ public class Beresheet_Spacecraft {
 	public void setPoint(double x,double y) {
 		this.p.x=x;
 		this.p.y=y;
+	}
+	
+	public void updateAllEnginesPower(double z) {
+		for (int i = 0; i < EngArr.length; i++) {
+			EngArr[i].setPower(z);
+		}
 	}
 	
 	public String toString() {

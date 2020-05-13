@@ -24,6 +24,13 @@ public class Point {
 		y = 0;
 	}
 	
+	public double distance2D(Point p2) {//new
+        double dx = this.x - p2.x;
+        double dy = this.y - p2.y;
+        double t = (dx*dx+dy*dy);
+        return Math.sqrt(t);
+	}
+	
 	@Override
 	public String toString() {
 		DecimalFormat df = new DecimalFormat("#.###");
