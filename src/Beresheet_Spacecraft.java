@@ -132,6 +132,14 @@ public class Beresheet_Spacecraft {
 			EngArr[i].setPower(z);
 		}
 	}
+
+	public void updateEnginePower(double angle, double dt, double acc) {
+		
+	}
+	
+	public void move() {
+		
+	}
 	
 	public String toString() {
 		DecimalFormat dfff = new DecimalFormat("#.##");

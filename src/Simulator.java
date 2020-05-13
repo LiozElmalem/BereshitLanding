@@ -94,7 +94,7 @@ public class Simulator extends JFrame{
 				
 			}
 			
-			bs.updateAllEnginesPower(bs.getNN());//Update the engines power                 snir
+				bs.updateAllEnginesPower(bs.getNN());//Update the engines power                 snir
 
 			
 			// main computations
@@ -114,18 +114,20 @@ public class Simulator extends JFrame{
 			}
 
 			v_acc -= vacc; 
-			if(bs.getHS()>0) {bs.setHS(bs.getHS()- h_acc*bs.getDT());}
+			if(bs.getHS()>0) {
+				bs.setHS(bs.getHS()- h_acc*bs.getDT());
+			}
 			
 			bs.setVS(bs.getVS()- v_acc*bs.getDT());
 			bs.setAlt(bs.getAlt()-bs.getDT()*bs.getVS()); 
 			
 			
 			//////////////////////////////////////////////////////////////////////////////////snir
-			if(bs.getAlt()>1000) {
+			if(bs.getAng()>0) {
 				//bs.setDist(bs.getDist()-bs.getHS()*bs.getDT());//boaz
 				bs.setDist(bs.getPoint().distance2D(landingPoint)*Normalize);
 			}else {
-				bs.setDist(bs.getAlt());
+				bs.setDist(bs.getAlt()-bs.getDT()*bs.getVS());
 			}
 			
 			if((lastALT-bs.getAlt()>1000) && (lastHS-bs.getHS()>60)) {
