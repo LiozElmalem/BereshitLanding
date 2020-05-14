@@ -9,23 +9,22 @@ public class Beresheet_Spacecraft {
 	public static final double MAIN_BURN = 0.15; //liter per sec, 12 liter per m'
 	public static final double SECOND_BURN = 0.009; //liter per sec 0.6 liter per m'
 	public static final double ALL_BURN = MAIN_BURN + 8*SECOND_BURN;
+		
+	private double vs;
+	private double hs;
+	private double dist;
+	private double ang; // zero is vertical (as in landing)
+	private double alt; 
+	private double lat;
+	private double time;
+	private double dt; // seconds
+	private double acc; // Acceleration rate (m/s^2)
+	private double fuel; // 
+	private double weight;
+	private double NN; // rate[0,1] How much gas to give to the system
 	
-	PID pid;
-	double vs;
-	double hs;
-	double dist;
-	double ang; // zero is vertical (as in landing)
-	double alt; 
-	double lat;
-	double time;
-	double dt; // seconds
-	double acc; // Acceleration rate (m/s^2)
-	double fuel; // 
-	double weight;
-	double NN; // rate[0,1] How much gas to give to the system
-	
-	NavigationEngine[] EngArr;
-	Point p;
+	private NavigationEngine[] EngArr;
+	private Point location;
 	
 	public Beresheet_Spacecraft() {
 		vs = 24.8;
@@ -40,9 +39,8 @@ public class Beresheet_Spacecraft {
 		fuel = 121;  
 		weight = WEIGHT_EMP + fuel;
 		NN = 0.7; 
-		pid = new PID(0.7 , 0 , 1 , 1 , 0); // [0,1]
 
-		p = new Point(0,100);//starting point
+		location = new Point(0,100);//starting point
 		
 		EngArr=new NavigationEngine[8];
 		EngArr[0]=new NavigationEngine("North1",0);
@@ -89,8 +87,8 @@ public class Beresheet_Spacecraft {
 	public double getNN() {
 		return NN;
 	}
-	public Point getPoint() {
-		return p;
+	public Point getLocation() {
+		return location;
 	}
 	////////Set////////////////////////////////
 	public void setVS(double vs) {
@@ -134,9 +132,9 @@ public class Beresheet_Spacecraft {
 	public void setNN(double nn) {
 		this.NN=nn;
 	}
-	public void setPoint(double x,double y) {
-		this.p.x=x;
-		this.p.y=y;
+	public void setLocation(double x,double y) {
+		this.location.x = x;
+		this.location.y = y;
 	}
 	
 	public void updateAllEnginesPower(double z) {

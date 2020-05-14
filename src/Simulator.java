@@ -6,13 +6,13 @@ import javax.swing.*;
 
 
 public class Simulator extends JFrame {
+	
 	Beresheet_Spacecraft bs;
 	private static final long serialVersionUID = 1L;	
-	private static final Image BackroundPath = new ImageIcon("C:\\Users\\user\\Desktop\\Lioz\\Autonomic Robots\\Bereshit-landing-Snir\\images\\backround1.png").getImage();
-	private static final Image SpacecraftPath = new ImageIcon("C:\\Users\\user\\Desktop\\Lioz\\Autonomic Robots\\Bereshit-landing-Snir\\images\\spacecraft.png").getImage();
-	private static int NormalizePixel_Y=40;
-	private static int NormalizePixel_X=85;
-
+	final Image BackroundPath = new ImageIcon("C:\\Users\\user\\Desktop\\Lioz\\Autonomic Robots\\Bereshit-landing-Snir\\images\\backround1.png").getImage();
+	final Image SpacecraftPath = new ImageIcon("C:\\Users\\user\\Desktop\\Lioz\\Autonomic Robots\\Bereshit-landing-Snir\\images\\spacecraft.png").getImage();
+	int NormalizePixel_Y=40;
+	int NormalizePixel_X=85;
 	
 	static double lastALT;
 	static double lastHS;
@@ -24,8 +24,8 @@ public class Simulator extends JFrame {
 	
 	public Simulator() {
 		bs=new Beresheet_Spacecraft();
-		x=(int) bs.getPoint().x;
-		y=(int) bs.getPoint().y;
+		x=(int) bs.getLocation().x;
+		y=(int) bs.getLocation().y;
 		 
 		setSize(1200,750);
 		setLayout(null);
@@ -78,17 +78,16 @@ public class Simulator extends JFrame {
 			//////////////////////////////////////////////////////////////////////////////////snir
 			
 			if((lastALT-bs.getAlt()>1000) && (lastHS-bs.getHS()>60)) {
-				y=(int)(bs.getPoint().y+NormalizePixel_Y);
-				x=(int)(bs.getPoint().x+NormalizePixel_X);
-				bs.p.y=y;
-				bs.p.x=x;
+				y=(int)(bs.getLocation().y+NormalizePixel_Y);
+				x=(int)(bs.getLocation().x+NormalizePixel_X);
+				bs.setLocation(x,y);
 				lastHS=bs.getHS();
 				lastALT=bs.getAlt();
 			}
 		
 			else if(bs.getAlt()<1000) {//last km
-				y=(int)(bs.getPoint().y+1);
-				bs.p.y=y;
+				y=(int)(bs.getLocation().y+1);
+				bs.setLocation(bs.getLocation().x , y);
 			}
 			//////////////////////////////////////////////////////////////////////////////////snir
 
