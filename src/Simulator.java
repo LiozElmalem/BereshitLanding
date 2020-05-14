@@ -57,7 +57,6 @@ public class Simulator extends JFrame {
 			}
 
 			bs.NNControl();
-			bs.updateAllEnginesPower(bs.getNN());// Update the engines power snir
 
 			// main computations
 			double ang_rad = Math.toRadians(bs.getAng());
@@ -77,6 +76,7 @@ public class Simulator extends JFrame {
 			bs.loactionUpdate();
 
 			if ((lastALT - bs.getAlt() > 1000) && (lastHS - bs.getHS() > 60)) {
+				
 				y = (int) (bs.getLocation().y + NormalizePixel_Y);
 				x = (int) (bs.getLocation().x + NormalizePixel_X);
 				

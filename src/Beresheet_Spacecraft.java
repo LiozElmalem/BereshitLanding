@@ -1,14 +1,13 @@
 import java.text.DecimalFormat;
-
 public class Beresheet_Spacecraft {
-	
-	public static final double WEIGHT_EMP = 165; // kg
-	public static final double WEIGHT_FULE = 420; // kg
-	public static final double WEIGHT_FULL = WEIGHT_EMP + WEIGHT_FULE; // kg
-	public static final double MAIN_ENG_F = 430; // N
-	public static final double SECOND_ENG_F = 25; // N
-	public static final double MAIN_BURN = 0.15; // liter per sec, 12 liter per m'
-	public static final double SECOND_BURN = 0.009; // liter per sec 0.6 liter per m'
+
+	public final double WEIGHT_EMP = 165; // kg
+	public final double WEIGHT_FULE = 420; // kg
+	public final double WEIGHT_FULL = WEIGHT_EMP + WEIGHT_FULE; // kg
+	public final static double MAIN_ENG_F = 430; // N
+	public final static double SECOND_ENG_F = 25; // N
+	public final static double MAIN_BURN = 0.15; // liter per sec, 12 liter per m'
+	public final static double SECOND_BURN = 0.009; // liter per sec 0.6 liter per m'
 	public static final double ALL_BURN = MAIN_BURN + 8 * SECOND_BURN;
 
 	private double vs;
@@ -25,7 +24,7 @@ public class Beresheet_Spacecraft {
 	private double NN; // rate[0,1] How much gas to give to the system
 
 	private PID pid; // NN one
-	private NavigationEngine[] EngArr;
+	private NavigationEngine[] engines;
 	private Point location;
 
 	public Beresheet_Spacecraft() {
@@ -40,21 +39,21 @@ public class Beresheet_Spacecraft {
 		acc = 0;
 		fuel = 121;
 		weight = WEIGHT_EMP + fuel;
-		
-		pid = new PID(0.7 , 0.01 , 0.01 , 1 , 0);
+
+		pid = new PID(0.7, 1, 0.01, 1, 0);
 		NN = 0.7;
 
 		location = new Point(0, 100);// starting point
 
-		EngArr = new NavigationEngine[8];
-		EngArr[0] = new NavigationEngine("North1", 0);
-		EngArr[1] = new NavigationEngine("North2", 0);
-		EngArr[2] = new NavigationEngine("East1", 0);
-		EngArr[3] = new NavigationEngine("East2", 0);
-		EngArr[4] = new NavigationEngine("South1", 0);
-		EngArr[5] = new NavigationEngine("South2", 0);
-		EngArr[6] = new NavigationEngine("West1", 0);
-		EngArr[7] = new NavigationEngine("West2", 0);
+		engines = new NavigationEngine[8];
+		engines[0] = new NavigationEngine("North1", 0);
+		engines[1] = new NavigationEngine("North2", 0);
+		engines[2] = new NavigationEngine("East1", 0);
+		engines[3] = new NavigationEngine("East2", 0);
+		engines[4] = new NavigationEngine("South1", 0);
+		engines[5] = new NavigationEngine("South2", 0);
+		engines[6] = new NavigationEngine("West1", 0);
+		engines[7] = new NavigationEngine("West2", 0);
 	}
 
 	/////////// Get//////////////////////////////
@@ -106,7 +105,6 @@ public class Beresheet_Spacecraft {
 		return location;
 	}
 
-	//////// Set////////////////////////////////
 	public void setVS(double vs) {
 		this.vs = vs;
 	}
@@ -164,9 +162,11 @@ public class Beresheet_Spacecraft {
 		this.location.y = y;
 	}
 
-	public void updateAllEnginesPower(double z) {
-		for (int i = 0; i < EngArr.length; i++) {
-			EngArr[i].setPower(z);
+	public void updateEngines() {
+		if(alt > 2000) {
+			for (int i = 0; i < engines.length; i++) {
+				engines[i].setPower(0);
+			}
 		}
 	}
 
@@ -181,32 +181,39 @@ public class Beresheet_Spacecraft {
 	}
 
 	public void speedControl(double h_acc, double v_acc) {
-		if (hs > 0) 
+		if (hs > 0)
 			hs -= h_acc * dt;
-		if(hs < 2 && alt <= 2000)
+		if (hs < 2 && alt <= 2000)
 			hs = 0;
-		if(vs >= 1) // Added
-			vs -= v_acc * dt;
+		vs = (vs - v_acc * dt) < 2 ? 0.3 : (vs - v_acc * dt);
+		if (alt < 15 && vs > 2) {
+			vs = (vs - 2) < 2 ? 0.3 : (vs - 2);
+		}
 	}
 
 	public void fuelControl(double dw) {
 		if (fuel > 0) {
 			fuel -= dw;
-			weight = (Beresheet_Spacecraft.WEIGHT_EMP + fuel);
+			weight = (WEIGHT_EMP + fuel);
 			acc = (NN * Actions.accMax(weight));
 		} else { // ran out of fuel
 			acc = 0;
 		}
 	}
 
+	public double constraint(double x) {
+		x = x > 1 ? 1 : x;
+		return x < 0 ? 0 : x;
+	}
+
 	public void NNControl() {
 		// over 2 km above the ground
 		if (alt > 2000) { // maintain a vertical speed of [20-25] m/s
 			if (vs > 25) {
-				NN = (NN + 0.003 * dt);// more power for braking
+				NN = constraint(NN + 0.003 * dt);// more power for braking
 			}
 			if (vs < 20) {
-				NN = (NN - 0.003 * dt);// less power for braking
+				NN = constraint(NN - 0.003 * dt);// more power for braking
 			}
 		} else {
 			if (ang > 3) {
@@ -216,22 +223,19 @@ public class Beresheet_Spacecraft {
 				ang = 0;
 			}
 
-			// Constraint the value 
-			NN = pid.control(dt , 0.5 - NN);
-			System.out.println("NN : " + NN);
-			
+			// Constraint the value
+			NN = constraint(pid.control(dt, 0.5 - NN));
+
 			if (alt < 125) { // very close to the ground!
 				NN = 1; // maximum braking!
 				if (vs < 5) {
 					NN = 0.7;
 				} // if it is slow enough - go easy on the brakes
 			}
-			
+			if (alt < 5) { // no need to stop
+				NN = 0.38;
+			}
 		}
-		if (alt < 5) { // no need to stop
-			NN = 0.38;
-		}
-
 	}
 
 	public void print() {
