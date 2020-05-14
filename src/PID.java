@@ -1,26 +1,25 @@
-
 public class PID {
 	
 	private double P, I, D;
 	private double lastError, sumIntegral;
-    private int[] range;
+    private int max;
+    private int min;
     
-	public PID(int P , int I , int D , int max){
+	public PID(double P , double I , double D , int max , int min){
       this.P = P;
       this.I = I;
       this.D = D;
       this.lastError = 0;
       this.sumIntegral = 0;
-      this.range = new int[2];
-      this.range[0] = -max;
-      this.range[1] = max;
+      this.max = max;
+      this.min = min;
 	}
     	
-    public double control(double dt , double error) {
+    public double control(double dt , double error) { // target - current
     	this.sumIntegral += this.I * error * dt;
     	double difference = (error - lastError) / dt;
-    	double constIntegral = (this.sumIntegral >= range[0]) ? this.sumIntegral : 0; 
-    	constIntegral = (this.sumIntegral <= range[1]) ? this.sumIntegral : range[1]; 
+    	double constIntegral = (this.sumIntegral >= min) ? this.sumIntegral : 0; 
+    	constIntegral = (this.sumIntegral <= max) ? this.sumIntegral : max; 
     	double output = this.P * error + this.D * difference + constIntegral;
     	this.lastError = error;
     	return output;
