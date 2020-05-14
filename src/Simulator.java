@@ -40,13 +40,13 @@ public class Simulator extends JFrame {
 		g.drawImage(BackroundPath, 0, 0, 1200, 750, null);
 		g.setColor(Color.green);
 		g.fillOval(Moon.LANDING_AREA_X, Moon.LANDING_AREA_Y, 40, 15);// Landing area
-		g.drawImage(SpacecraftPath, x, y, 20, 20, null);
+		g.drawImage(SpacecraftPath, x, y, 25, 25, null);
 	}
 
 	public void loop() {
 
-		lastALT = bs.getAlt();// 13748 snir
-		lastHS = bs.getHS();// 24.8
+		lastALT = bs.getAlt();
+		lastHS = bs.getHS();
 
 		while (bs.getAlt() > Moon.realDestinationPoint.y && bs.getLat() < Moon.realDestinationPoint.x) {
 
@@ -57,21 +57,15 @@ public class Simulator extends JFrame {
 			}
 
 			bs.NNControl();
-
-			// main computations
+			bs.updateEngines();
 			double ang_rad = Math.toRadians(bs.getAng());
 			double h_acc = Math.sin(ang_rad) * bs.getAcc();
 			double v_acc = Math.cos(ang_rad) * bs.getAcc();
 			double vacc = Moon.getAcc(bs.getHS());
-
+			
 			bs.timer();
-
-			double dw = bs.getDT() * Beresheet_Spacecraft.ALL_BURN * bs.getNN(); // Difference weight
-
-			bs.fuelControl(dw);
-
+			bs.fuelControl();
 			v_acc -= vacc;
-
 			bs.speedControl(h_acc, v_acc);
 			bs.loactionUpdate();
 
@@ -86,7 +80,7 @@ public class Simulator extends JFrame {
 				lastALT = bs.getAlt();
 			}
 
-			else if (bs.getAlt() < 1000) { // last km
+			else if (bs.getAlt() < 1000) { 
 				y = (int) (bs.getLocation().y + 1);
 				bs.setLocation(bs.getLocation().x, y);
 			}
